@@ -1,10 +1,10 @@
 from datetime import datetime
-
+from ..database import Base
 from sqlalchemy import DateTime, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 
-class User(Base):
+class Event(Base):
     __tablename__ = "events"
 
     id: Mapped[int] = mapped_column(primary_key=True)

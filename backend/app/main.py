@@ -1,10 +1,11 @@
 from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from .database import Base, engine
 
+from .models.event import Event
+from .models.interest import Interest
+from .models.user import User
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
