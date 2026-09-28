@@ -1,5 +1,15 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from .database import Base, engine
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
 
 
 # Create the FastAPI application instance.
@@ -7,6 +17,7 @@ app = FastAPI(
     title="EventCalendar API",
     description="Backend API for personalized event discovery and calendar management.",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 # Allow the Next.js frontend to call this API during local development.
