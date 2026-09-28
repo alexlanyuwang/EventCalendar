@@ -1,7 +1,19 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useRef } from "react";
+
 export default function LoginPage() {
+  const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-white px-6 py-12 text-black">
-      <form className="flex w-full max-w-sm flex-col gap-4">
+      <form
+        ref={formRef}
+        className="flex w-full max-w-sm flex-col gap-4"
+        onSubmit={(event) => event.preventDefault()}
+      >
         <label htmlFor="email" className="font-medium">
           Email
         </label>
@@ -33,6 +45,19 @@ export default function LoginPage() {
         <button
           type="button"
           className="rounded border border-black bg-white px-3 py-2 text-black"
+          onClick={() => {
+            const form = formRef.current;
+            if (!form) return;
+
+            const formData = new FormData(form);
+            sessionStorage.setItem(
+              "registration-prefill",
+              JSON.stringify({
+                email: formData.get("email") ?? "",
+              }),
+            );
+            router.push("/register");
+          }}
         >
           Register
         </button>

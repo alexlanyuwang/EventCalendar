@@ -7,6 +7,10 @@ from .models.event import Event
 from .models.interest import Interest
 from .models.user import User
 
+from .routers.registration import router as registration_router
+from .routers.login import router as login_router
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     Base.metadata.create_all(bind=engine)
@@ -41,3 +45,8 @@ def read_root() -> dict[str, str]:
 def health_check() -> dict[str, str]:
     """Provide a simple health-check endpoint for monitoring and development."""
     return {"status": "ok"}
+
+
+app.include_router(registration_router)
+app.include_router(login_router)
+

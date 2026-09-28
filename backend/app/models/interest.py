@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 
 class Interest(Base):
-    __tablename__ = "interests"
+    __tablename__ = "interest"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     event_id: Mapped[int] = mapped_column(String(255), index=True)

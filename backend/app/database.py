@@ -27,7 +27,7 @@ class Base(DeclarativeBase):
 
 
 # Provide one session per request and always close it afterward.
-def get_db() -> Generator[Session, None, None]:
+def get_db() :
     db = SessionLocal()
     try:
         yield db
