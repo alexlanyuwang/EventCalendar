@@ -8,6 +8,8 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [formMessage, setFormMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const storedValues = sessionStorage.getItem("registration-prefill");
@@ -32,13 +34,39 @@ export default function RegisterPage() {
     <main className="flex min-h-screen items-center justify-center bg-white px-6 py-12 text-black">
       <form
         className="flex w-full max-w-sm flex-col gap-4"
-        onSubmit={(event) => {
+        onSubmit={async (event) => {
           event.preventDefault();
+          setFormMessage("");
+
           if (password !== confirmPassword) {
             setPasswordError("Passwords do not match.");
             return;
           }
           setPasswordError("");
+          const formData = new FormData(event.currentTarget);
+          const registrationData = {
+            name: formData.get("name") as string,
+            email: formData.get("email") as string,
+            password: formData.get("password") as string,
+          };
+          setIsSubmitting(true);
+          try {
+            const response = await fetch("/api/auth/register", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(registrationData),
+            });
+            const result = await response.json();
+            if (!response.ok) {
+              setFormMessage(result.message || "Registration failed.");
+              return;
+            }
+            setFormMessage("Registration successful. You can now log in.");
+          } catch (error) {
+            setFormMessage("An error occurred during registration.");
+          } finally {
+            setIsSubmitting(false);
+          }
         }}
       >
         <h1 className="mb-2 text-2xl font-semibold">Register</h1>
@@ -108,12 +136,18 @@ export default function RegisterPage() {
             {passwordError}
           </p>
         )}
+        {formMessage && (
+          <p role="alert" className="text-sm text-green-700">
+            {formMessage}
+          </p>
+        )}
 
         <button
           type="submit"
+          disabled={isSubmitting}
           className="rounded border border-black bg-black px-3 py-2 text-white"
         >
-          Register
+          {isSubmitting ? "Please wait..." : "Register"}
         </button>
         <Link href="/login" className="text-center underline">
           Back to login
