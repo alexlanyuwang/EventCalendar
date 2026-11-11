@@ -10,6 +10,7 @@ export default function RegisterPage() {
   const [passwordError, setPasswordError] = useState("");
   const [formMessage, setFormMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFormError, setIsFormError] = useState(false);
 
   useEffect(() => {
     const storedValues = sessionStorage.getItem("registration-prefill");
@@ -37,9 +38,11 @@ export default function RegisterPage() {
         onSubmit={async (event) => {
           event.preventDefault();
           setFormMessage("");
+          setIsFormError(false);
 
           if (password !== confirmPassword) {
             setPasswordError("Passwords do not match.");
+            setIsFormError(true);
             return;
           }
           setPasswordError("");
@@ -58,12 +61,32 @@ export default function RegisterPage() {
             });
             const result = await response.json();
             if (!response.ok) {
-              setFormMessage(result.message || "Registration failed.");
+              const detail = result.detail;
+              const message =
+                typeof detail === "string"
+                  ? detail
+                  : Array.isArray(detail)
+                    ? detail
+                        .map((error: { msg?: string }) =>
+                          error.msg?.replace(/^Value error,\s*/, ""),
+                        )
+                        .filter(Boolean)
+                        .join(" ")
+                    : "";
+
+              setFormMessage(message || "Registration failed.");
+              setIsFormError(true);
               return;
             }
-            setFormMessage("Registration successful. You can now log in.");
+            setFormMessage(
+              typeof result.message === "string"
+                ? result.message
+                : "Registration successful. You can now log in.",
+            );
+            setIsFormError(false);
           } catch (error) {
             setFormMessage("An error occurred during registration.");
+            setIsFormError(true);
           } finally {
             setIsSubmitting(false);
           }
@@ -79,6 +102,7 @@ export default function RegisterPage() {
           name="name"
           type="text"
           autoComplete="name"
+          maxLength={254}
           required
           className="rounded border border-gray-400 bg-white px-3 py-2 text-black outline-none focus:border-black"
         />
@@ -92,6 +116,7 @@ export default function RegisterPage() {
           name="email"
           type="email"
           autoComplete="email"
+          maxLength={254}
           required
           className="rounded border border-gray-400 bg-white px-3 py-2 text-black outline-none focus:border-black"
         />
@@ -104,6 +129,7 @@ export default function RegisterPage() {
           name="password"
           type="password"
           autoComplete="new-password"
+          maxLength={254}
           required
           value={password}
           onChange={(event) => {
@@ -121,6 +147,7 @@ export default function RegisterPage() {
           name="confirm-password"
           type="password"
           autoComplete="new-password"
+          maxLength={254}
           required
           value={confirmPassword}
           onChange={(event) => {
@@ -137,7 +164,10 @@ export default function RegisterPage() {
           </p>
         )}
         {formMessage && (
-          <p role="alert" className="text-sm text-green-700">
+          <p
+            role="alert"
+            className={`text-sm ${isFormError ? "text-red-700" : "text-green-700"}`}
+          >
             {formMessage}
           </p>
         )}

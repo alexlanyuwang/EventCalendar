@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -7,9 +7,24 @@ from ..models.user import User
 from ..security.password import hash_password
 
 class RegistrationRequest(BaseModel):
-    email: str
-    password: str = Field(min_length=8)
-    name: str
+    email: str = Field(max_length=254)
+    password: str = Field(max_length=254)
+    name: str = Field(max_length=254)
+
+    @field_validator("password")
+    @classmethod
+    def password_meets_requirements(cls, password: str) -> str:
+        if (len(password) > 128):
+            raise ValueError("Password must be at most 128 characters.")
+        elif (
+            not 8 <= len(password) <= 128
+            or not any(char.isupper() or char.isdigit() for char in password)
+            or not any(not char.isalnum() and not char.isspace() for char in password)
+        ):
+            raise ValueError(
+                "Password must be at least 8 characters and include an uppercase letter or number, and a special character."
+            )
+        return password
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -36,4 +51,4 @@ def register_user(request: RegistrationRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    return {"message": "User registered successfully"}
+    return {"message": "Registration successful. You can now log in."}

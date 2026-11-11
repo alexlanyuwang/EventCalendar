@@ -16,7 +16,10 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 @router.post("/login", status_code=status.HTTP_200_OK)
 def login_user(request: LoginRequest, db: Session = Depends(get_db)):
     # Find the user by email
-    user = db.query(User).filter(User.email == request.email and User.is_active == True).first()
+    user = db.query(User).filter(
+        User.email == request.email,
+        User.is_active.is_(True),
+    ).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
