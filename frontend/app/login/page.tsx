@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useState } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -21,22 +21,24 @@ export default function LoginPage() {
           event.preventDefault();
           setFormMessage("");
           const formData = new FormData(event.currentTarget);
-          const loginData = {
-            email: formData.get("email") as string,
-            password: formData.get("password") as string,
-          };
+          const loginData = new URLSearchParams({
+            username: String(formData.get("email") ?? ""),
+            password: String(formData.get("password") ?? ""),
+          });
           setIsSubmitting(true);
           try {
-            const response = await fetch("/api/auth/login", {
+            const response = await fetch("/api/auth/token", {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(loginData),
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: loginData,
             });
             const result = await response.json();
             if (response.ok) {
+              sessionStorage.setItem("access_token", result.access_token);
               setFormMessage("Login successful.");
               setFormMessageType("success");
-              // TODO handle successful login and implement tokens
             } else {
               switch (response.status) {
                 case 401:
@@ -49,7 +51,7 @@ export default function LoginPage() {
               }
               return;
             }
-          } catch (error) {
+          } catch {
             setFormMessageType("error");
             setFormMessage("An error occurred while logging in.");
           } finally {
@@ -64,6 +66,8 @@ export default function LoginPage() {
           id="email"
           name="email"
           type="email"
+          autoComplete="email"
+          maxLength={254}
           required
           className="rounded border border-gray-400 bg-white px-3 py-2 text-black outline-none focus:border-black"
         />

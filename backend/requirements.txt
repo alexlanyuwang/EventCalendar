@@ -5,3 +5,5 @@ PyJWT
 pwdlib[argon2]
 python-dotenv
 Authlib
+pydantic-settings
+python-multipart

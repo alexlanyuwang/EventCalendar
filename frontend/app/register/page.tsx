@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 export default function RegisterPage() {
   const emailInput = useRef<HTMLInputElement>(null);
+  const usernameInput = useRef<HTMLInputElement>(null);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -21,10 +22,14 @@ export default function RegisterPage() {
     try {
       const values = JSON.parse(storedValues) as {
         email?: string;
+        username?: string;
       };
 
       if (emailInput.current && typeof values.email === "string") {
         emailInput.current.value = values.email;
+      }
+      if (usernameInput.current && typeof values.username === "string") {
+        usernameInput.current.value = values.username;
       }
     } catch {
       return;
@@ -49,6 +54,7 @@ export default function RegisterPage() {
           const formData = new FormData(event.currentTarget);
           const registrationData = {
             name: formData.get("name") as string,
+            username: formData.get("username") as string,
             email: formData.get("email") as string,
             password: formData.get("password") as string,
           };
@@ -84,7 +90,7 @@ export default function RegisterPage() {
                 : "Registration successful. You can now log in.",
             );
             setIsFormError(false);
-          } catch (error) {
+          } catch {
             setFormMessage("An error occurred during registration.");
             setIsFormError(true);
           } finally {
@@ -93,6 +99,21 @@ export default function RegisterPage() {
         }}
       >
         <h1 className="mb-2 text-2xl font-semibold">Register</h1>
+
+        <label htmlFor="username" className="font-medium">
+          Username
+        </label>
+        <input
+          ref={usernameInput}
+          id="username"
+          name="username"
+          type="text"
+          autoComplete="username"
+          minLength={3}
+          maxLength={64}
+          required
+          className="rounded border border-gray-400 bg-white px-3 py-2 text-black outline-none focus:border-black"
+        />
 
         <label htmlFor="name" className="font-medium">
           Name
